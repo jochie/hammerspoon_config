@@ -2,6 +2,9 @@ local adium_status = 0
 local gotomeeting_status = 0
 local joinme_status = 0
 
+local log = hs.logger.new("adium", 'debug')
+log.i('Initializing')
+
 function switch_adium_status(old, new)
     -- https://trac.adium.im/ticket/10326
     local code = [[
@@ -17,7 +20,6 @@ function switch_adium_status(old, new)
 	    end tell
             return total
     ]]
-    -- hs.alert.show("Code = "..code)
     local err, result = hs.applescript.applescript(code)
     return err, result
 end
@@ -46,33 +48,49 @@ function adium_time_status()
         return
     end
     local date = os.date("*t", os.time())
+    log.df('adium_time_status - date.wday = %d, date.hour = %d', date.wday, date.hour)
     if date.wday == 1 or date.wday == 7 then
         local err, result = switch_adium_status("Away", "Home. Enjoy your weekend!")
         if result > 0 then
             hs.alert.show("WEEKEND: Switched Adium to Weekend (from Away) status for "..result.." accounts.")
         end
     else
-        if date.hour < 8 or date.hour > 17 then
+        if date.hour < 8 or date.hour >= 17 then
+            log.df('adium_time_status: Intend to switch adium from "Away" to "Gone for the day".')
 	    local err, result = switch_adium_status("Away", "Gone for the day.")
 	    if result > 0 then
 		hs.alert.show("EVENING: Switched Adium to Evening (from Away) status for "..result.." accounts.")
+		log.df('adium_time_status: Succeeded for %d accounts.', result)
+	    else
+		log.d('adium_time_status: Succeeded for zero accounts.')
 	    end
         elseif date.hour >= 12 and date.hour <= 14 then
+            log.df('adium_time_status: Intend to switch adium from "Away" to "AFK/Out for lunch".')
 	    local err, result = switch_adium_status("Away", "AFK/Out for lunch")
 	    if result > 0 then
 		hs.alert.show("EVENING: Switched Adium to Lunch status for "..result.." accounts.")
+		log.df('adium_time_status: Succeeded for %d accounts.', result)
+	    else
+		log.d('adium_time_status: Succeeded for zero accounts.')
 	    end
         else
 	    -- How to check if the screen is (un)locked? Use helper script for now:
             local result = hs.task.new(os.getenv("HOME").."/.hammerspoon/lock_test.py", function(exitCode, stdOut, stdErr)
+	        log.df('adium_time_status - lock_test.py result: %d', exitCode)
                 if exitCode == 1 then
 		    local err, result = switch_adium_status("Gone for the day.", "Available")
 		    if result > 0 then
 			hs.alert.show("EVENING: Switched Adium to Available (from Evening) status for "..result.." accounts.")
+			log.df('adium_time_status: Succeeded for %d accounts.', result)
+		    else
+		    	log.d('adium_time_status: Succeeded for zero accounts.')
 		    end
 		    local err, result = switch_adium_status("Home. Enjoy your weekend!", "Available")
 		    if result > 0 then
 			hs.alert.show("EVENING: Switched Adium to Available (from Weekend) status for "..result.." accounts.")
+			log.df('adium_time_status: Succeeded for %d accounts.', result)
+		    else
+		    	log.d('adium_time_status: Succeeded for zero accounts.')
 		    end
 		end
             end, { path }):start()
@@ -98,10 +116,22 @@ hs.timer.doAfter(1, function()
 	end
 	if name == "Adium" then
 	    adium_status = adium_status + new_status
+	    if adium_status < 0 then
+	        log.wf("adium_status somehow managed to be %d. Corrected.", adium_status)
+		adium_status = 0
+	    end
 	elseif string.find(name, "GoToMeeting") then
 	    gotomeeting_status = gotomeeting_status + new_status
+	    if adium_status < 0 then
+	        log.wf("gotomeeting_status somehow managed to be %d. Corrected.", gotomeeting_status)
+		gotomeeting_status = 0
+	    end
 	elseif name == "join.me" then
 	    joinme_status = joinme_status + new_status
+	    if joinme_status < 0 then
+	        log.wf("joinme_status somehow managed to be %d. Corrected.", joinme_status)
+		joinme_status = 0
+	    end
 	else
 	    return
 	end
@@ -145,3 +175,5 @@ hs.timer.doAfter(1, function()
     adium_time_status()
     hs.timer.doEvery(60, adium_time_status)
 end)
+
+log.i('Initialization finished.')
