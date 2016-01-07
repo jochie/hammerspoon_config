@@ -8,7 +8,7 @@ From the hello world section: http://www.hammerspoon.org/go/#helloworld
 require "wifi"
 
 -- -- Do things based on timing:
--- require "timer"
+require "timer"
 
 -- Automatically reload the hammerspoon config if any of the *.lua files
 -- in the ~/.hammerspoon/ directory changed:
