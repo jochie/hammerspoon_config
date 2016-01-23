@@ -12,7 +12,7 @@ function timer_tick()
 end
 
 -- Reminder of time passing
-hs.timer.doEvery(300, timer_tick)
+local timer_obj = hs.timer.doEvery(300, timer_tick)
 
 timer_tick()
 

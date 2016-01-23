@@ -2,6 +2,11 @@ local adium_status = 0
 local gotomeeting_status = 0
 local joinme_status = 0
 
+-- Hang on to these so they're not garbage-collected after a while (usually hours):
+local adium_timer
+local adium_watcher
+local adium_startup
+
 local log = hs.logger.new("adium", 'debug')
 log.i('Initializing')
 
@@ -152,8 +157,8 @@ function log_update(var, orig, diff)
 end
 
 -- Do this asynchronously, to avoid holding up the config (re)load:
-hs.timer.doAfter(1, function()
-    hs.application.watcher.new(function(name, event, app)
+adium_startup = hs.timer.doAfter(1, function()
+    adium_watcher = hs.application.watcher.new(function(name, event, app)
 	local new_status = 0
 
 	if     event == hs.application.watcher.terminated then
@@ -220,7 +225,7 @@ hs.timer.doAfter(1, function()
     update_adium_status()
 
     adium_time_status()
-    hs.timer.doEvery(60, adium_time_status)
+    adium_timer = hs.timer.doEvery(60, adium_time_status)
 end)
 
 log.i('Initialization finished.')
