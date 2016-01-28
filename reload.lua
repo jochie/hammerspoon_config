@@ -1,4 +1,8 @@
-function reloadConfig(files)
+if reload then return end
+
+reload = {}
+
+function reload.config(files)
     doReload = false
     for _, file in pairs(files) do
         if file:sub(-4) == ".lua" then
@@ -11,4 +15,4 @@ function reloadConfig(files)
 end
 
 -- Set up path watcher:
-hs.pathwatcher.new(os.getenv("HOME").."/.hammerspoon/", reloadConfig):start()
+reload.watcher = hs.pathwatcher.new(os.getenv("HOME").."/.hammerspoon/", reload.config):start()

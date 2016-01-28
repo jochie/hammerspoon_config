@@ -1,16 +1,17 @@
-local adium_status = 0
-local gotomeeting_status = 0
-local joinme_status = 0
+if adium then return end
+
+adium = {}
+
+adium.adium_status = 0
+adium.gotomeeting_status = 0
+adium.joinme_status = 0
 
 -- Hang on to these so they're not garbage-collected after a while (usually hours):
-local adium_timer
-local adium_watcher
-local adium_startup
 
-local log = hs.logger.new("adium", 'debug')
-log.i('Initializing')
+adium.log = hs.logger.new("adium", 'debug')
+adium.log.i('Initializing')
 
-function count_adium_not_status(str)
+function adium.count_adium_not_status(str)
     local code = [[
         local total
         set total to 0
@@ -28,7 +29,7 @@ function count_adium_not_status(str)
     return err, result
 end
 
-function switch_adium_status(old, new)
+function adium.switch_adium_status(old, new)
     -- https://trac.adium.im/ticket/10326
     local code = [[
         local total
@@ -47,99 +48,99 @@ function switch_adium_status(old, new)
     return err, result
 end
 
-function update_adium_status()
-    if adium_status == 0 then
+function adium.update_adium_status()
+    if adium.adium_status == 0 then
         return
     end
-    if gotomeeting_status > 0 or joinme_status > 0 then
-        local err, result = switch_adium_status("Available", "Conference Call")
+    if adium.gotomeeting_status > 0 or adium.joinme_status > 0 then
+        local err, result = adium.switch_adium_status("Available", "Conference Call")
         if result > 0 then
             hs.alert.show("Switched Adium to Conference Call status for "..result.." accounts.")
         end
     else
-        local err, result = switch_adium_status("Conference Call", "Available")
+        local err, result = adium.switch_adium_status("Conference Call", "Available")
         if result > 0 then
             hs.alert.show("Switched Adium to Available status for "..result.." accounts.")
         end
     end
 end
 
-function adium_time_status()
+function adium.adium_time_status()
     -- Avoid this code if Adium isn't running. The applescript snippets will
     -- actually cause it to be launched.
-    if adium_status == 0 then
+    if adium.adium_status == 0 then
         return
     end
     local date = os.date("*t", os.time())
     if date.wday == 1 or date.wday == 7 then
-        local err, result = count_adium_not_status("Home. Enjoy your weekend!")
+        local err, result = adium.count_adium_not_status("Home. Enjoy your weekend!")
         if result > 0 then
-            log.df('adium_time_status - date.wday = %d, date.hour = %d', date.wday, date.hour)
-	    log.df('adium_time_status: Intend to switch adium from "Away" to "Home. Enjoy your weekend!".')
-	    local err, result = switch_adium_status("Away", "Home. Enjoy your weekend!")
+            adium.log.df('adium_time_status - date.wday = %d, date.hour = %d', date.wday, date.hour)
+	    adium.log.df('adium_time_status: Intend to switch adium from "Away" to "Home. Enjoy your weekend!".')
+	    local err, result = adium.switch_adium_status("Away", "Home. Enjoy your weekend!")
 	    if result > 0 then
 		hs.alert.show("WEEKEND: Switched Adium to Weekend (from Away) status for "..result.." accounts.")
-                log.df('adium_time_status: Succeeded for %d accounts.', result)
+                adium.log.df('adium_time_status: Succeeded for %d accounts.', result)
             else
-                log.d('adium_time_status: Succeeded for zero accounts.')
+                adium.log.d('adium_time_status: Succeeded for zero accounts.')
 	    end
         end
     else
         if date.hour < 8 or date.hour >= 17 then
-            local err, result = count_adium_not_status("Gone for the day.")
+            local err, result = adium.count_adium_not_status("Gone for the day.")
             if result > 0 then
-                log.df('adium_time_status - date.wday = %d, date.hour = %d', date.wday, date.hour)
-		log.df('adium_time_status: Intend to switch adium from "Away" to "Gone for the day".')
-		local err, result = switch_adium_status("Away", "Gone for the day.")
+                adium.log.df('adium_time_status - date.wday = %d, date.hour = %d', date.wday, date.hour)
+		adium.log.df('adium_time_status: Intend to switch adium from "Away" to "Gone for the day".')
+		local err, result = adium.switch_adium_status("Away", "Gone for the day.")
 		if result > 0 then
 		    hs.alert.show("EVENING: Switched Adium to Evening (from Away) status for "..result.." accounts.")
-		    log.df('adium_time_status: Succeeded for %d accounts.', result)
+		    adium.log.df('adium_time_status: Succeeded for %d accounts.', result)
 		else
-		    log.d('adium_time_status: Succeeded for zero accounts.')
+		    adium.log.d('adium_time_status: Succeeded for zero accounts.')
 		end
             end
         elseif date.hour >= 12 and date.hour < 14 then
-            local err, result = count_adium_not_status("AFK/Out for lunch")
+            local err, result = adium.count_adium_not_status("AFK/Out for lunch")
             if result > 0 then
-                log.df('adium_time_status - date.wday = %d, date.hour = %d', date.wday, date.hour)
-		log.df('adium_time_status: Intend to switch adium from "Away" to "AFK/Out for lunch".')
-		local err, result = switch_adium_status("Away", "AFK/Out for lunch")
+                adium.log.df('adium_time_status - date.wday = %d, date.hour = %d', date.wday, date.hour)
+		adium.log.df('adium_time_status: Intend to switch adium from "Away" to "AFK/Out for lunch".')
+		local err, result = adium.switch_adium_status("Away", "AFK/Out for lunch")
 		if result > 0 then
 		    hs.alert.show("EVENING: Switched Adium to Lunch status for "..result.." accounts.")
-		    log.df('adium_time_status: Succeeded for %d accounts.', result)
+		    adium.log.df('adium_time_status: Succeeded for %d accounts.', result)
 		else
-		    log.d('adium_time_status: Succeeded for zero accounts.')
+		    adium.log.d('adium_time_status: Succeeded for zero accounts.')
 		end
             end
         else
 	    -- It should now be a weekday and the time is [ 8:00, 12:00 >, or [ 14:00, 17:00 >
-            local err, result = count_adium_not_status("Available")
+            local err, result = adium.count_adium_not_status("Available")
             if result > 0 then
 		-- How to check if the screen is (un)locked? Use helper script for now:
 		local result = hs.task.new(os.getenv("HOME").."/.hammerspoon/lock_test.py", function(exitCode, stdOut, stdErr)
-                    log.df('adium_time_status - date.wday = %d, date.hour = %d', date.wday, date.hour)
-		    log.df('adium_time_status - lock_test.py result: %d', exitCode)
+                    adium.log.df('adium_time_status - date.wday = %d, date.hour = %d', date.wday, date.hour)
+		    adium.log.df('adium_time_status - lock_test.py result: %d', exitCode)
 		    if exitCode == 1 then
-			local err, result = switch_adium_status("Gone for the day.", "Available")
+			local err, result = adium.switch_adium_status("Gone for the day.", "Available")
 			if result > 0 then
 			    hs.alert.show("EVENING: Switched Adium to Available (from Evening) status for "..result.." accounts.")
-			    log.df('adium_time_status: Succeeded for %d accounts.', result)
+			    adium.log.df('adium_time_status: Succeeded for %d accounts.', result)
 			else
-			    -- log.d('adium_time_status: Succeeded for zero accounts.')
+			    -- adium.log.d('adium_time_status: Succeeded for zero accounts.')
 			end
-			local err, result = switch_adium_status("Home. Enjoy your weekend!", "Available")
+			local err, result = adium.switch_adium_status("Home. Enjoy your weekend!", "Available")
 			if result > 0 then
 			    hs.alert.show("EVENING: Switched Adium to Available (from Weekend) status for "..result.." accounts.")
-			    log.df('adium_time_status: Succeeded for %d accounts.', result)
+			    adium.log.df('adium_time_status: Succeeded for %d accounts.', result)
 			else
-			    log.d('adium_time_status: Succeeded for zero accounts.')
+			    adium.log.d('adium_time_status: Succeeded for zero accounts.')
 			end
-			local err, result = switch_adium_status("AFK/Out for lunch", "Available")
+			local err, result = adium.switch_adium_status("AFK/Out for lunch", "Available")
 			if result > 0 then
 			    hs.alert.show("EVENING: Switched Adium to Available (from Lunch) status for "..result.." accounts.")
-			    log.df('adium_time_status: Succeeded for %d accounts.', result)
+			    adium.log.df('adium_time_status: Succeeded for %d accounts.', result)
 			else
-			    log.d('adium_time_status: Succeeded for zero accounts.')
+			    adium.log.d('adium_time_status: Succeeded for zero accounts.')
 			end
                     end
 		end):start()
@@ -151,14 +152,14 @@ function adium_time_status()
     end
 end
 
-function log_update(var, orig, diff)
-    log.df("adium: App %s changed from %d to %d", var, orig, orig + diff)
+function adium.log_update(var, orig, diff)
+    adium.log.df("adium: App %s changed from %d to %d", var, orig, orig + diff)
     return orig + diff
 end
 
 -- Do this asynchronously, to avoid holding up the config (re)load:
-adium_startup = hs.timer.doAfter(1, function()
-    adium_watcher = hs.application.watcher.new(function(name, event, app)
+adium.startup = hs.timer.doAfter(1, function()
+    adium.watcher = hs.application.watcher.new(function(name, event, app)
 	local new_status = 0
 
 	if     event == hs.application.watcher.terminated then
@@ -170,22 +171,22 @@ adium_startup = hs.timer.doAfter(1, function()
 	    return
 	end
 	if name == "Adium" then
-            adium_status = log_update("adium", adium_status, new_status)
-	    if adium_status < 0 then
-	        log.wf("adium_status somehow managed to be %d. Corrected.", adium_status)
-		adium_status = 0
+            adium.adium_status = adium.log_update("adium", adium.adium_status, new_status)
+	    if adium.adium_status < 0 then
+	        adium.log.wf("adium_status somehow managed to be %d. Corrected.", adium_status)
+		adium.adium_status = 0
 	    end
 	elseif string.find(name, "GoToMeeting") then
-	    gotomeeting_status = log_update("gotomeeting", gotomeeting_status, new_status)
-	    if adium_status < 0 then
-	        log.wf("gotomeeting_status somehow managed to be %d. Corrected.", gotomeeting_status)
-		gotomeeting_status = 0
+	    adium.gotomeeting_status = adium.log_update("gotomeeting", adium.gotomeeting_status, new_status)
+	    if adium.gotomeeting_status < 0 then
+	        adium.log.wf("gotomeeting_status somehow managed to be %d. Corrected.", adium.gotomeeting_status)
+		adium.gotomeeting_status = 0
 	    end
 	elseif name == "join.me" then
-	    joinme_status = log_update("join.me", joinme_status, new_status)
-	    if joinme_status < 0 then
-	        log.wf("joinme_status somehow managed to be %d. Corrected.", joinme_status)
-		joinme_status = 0
+	    adium.joinme_status = adium.log_update("join.me", adium.joinme_status, new_status)
+	    if adium.joinme_status < 0 then
+	        adium.log.wf("joinme_status somehow managed to be %d. Corrected.", adium.joinme_status)
+		adium.joinme_status = 0
 	    end
 	else
 	    return
@@ -195,13 +196,13 @@ adium_startup = hs.timer.doAfter(1, function()
 	elseif new_status < 0 then
 	    hs.alert.show(name.." is no longer running")
 	end
-	update_adium_status()
+	adium.update_adium_status()
     end):start()
 
     local app = hs.application.find("GoToMeeting")
     if app then
 	hs.alert.show("GoToMeeting is running")
-	gotomeeting_status = log_update("gotomeeting", gotomeeting_status, 1)
+	adium.gotomeeting_status = adium.log_update("gotomeeting", adium.gotomeeting_status, 1)
     else
 	hs.alert.show("GoToMeeting is not running")
     end
@@ -209,7 +210,7 @@ adium_startup = hs.timer.doAfter(1, function()
     app = hs.application.get("join.me")
     if app then
 	hs.alert.show("join.me is running")
-	joinme_status = log_update("join.me", joinme_status, 1)
+	adium.joinme_status = adium.log_update("join.me", adium.joinme_status, 1)
     else
 	hs.alert.show("join.me is not running")
     end
@@ -217,15 +218,15 @@ adium_startup = hs.timer.doAfter(1, function()
     local app = hs.application.get("Adium")
     if app then
 	hs.alert.show("Adium is running")
-	adium_status = log_update("adium", adium_status, 1)
+	adium.adium_status = adium.log_update("adium", adium.adium_status, 1)
     else
 	hs.alert.show("Adium is not running")
     end
 
-    update_adium_status()
+    adium.update_adium_status()
 
-    adium_time_status()
-    adium_timer = hs.timer.doEvery(60, adium_time_status)
+    adium.adium_time_status()
+    adium.timer = hs.timer.doEvery(60, adium.adium_time_status)
 end)
 
-log.i('Initialization finished.')
+adium.log.i('Initialization finished.')

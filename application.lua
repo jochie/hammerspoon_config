@@ -1,4 +1,8 @@
-local application_watcher = hs.application.watcher.new(function(name, event, app)
+if application then return end
+
+application = {}
+
+application.watcher = hs.application.watcher.new(function(name, event, app)
     name = name or "Unknown"
     event_name = "Unknown"
     if     event == hs.application.watcher.activated then

@@ -1,19 +1,23 @@
-local log = hs.logger.new("timer", "debug")
-log.i('Initializing')
+if timer then return end
 
-local counter = 0
-local tick = true
-local start_time = os.time()
+timer = {}
 
-function timer_tick()
-    counter = counter + 1
-    log.df("T%sck .. #%d, going on %d seconds.", tick and "i" or "o", counter, os.time() - start_time)
-    tick = not tick
+timer.log = hs.logger.new("timer", "debug")
+timer.log.i('Initializing')
+
+timer.counter = 0
+timer.tick = true
+timer.start_time = os.time()
+
+function timer.tick()
+    timer.counter = timer.counter + 1
+    timer.log.df("T%sck .. #%d, going on %d seconds.", timer.tick and "i" or "o", timer.counter, os.time() - timer.start_time)
+    timer.tick = not timer.tick
 end
 
 -- Reminder of time passing
-local timer_obj = hs.timer.doEvery(300, timer_tick)
+timer.obj = hs.timer.doEvery(300, timer.tick)
 
-timer_tick()
+timer.tick()
 
-log.i('Initialization finished.')
+timer.log.i('Initialization finished.')

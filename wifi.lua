@@ -1,12 +1,15 @@
--- Keep track of what network we're on, and trigger actions:
-local previous_wifi_network
+if wifi then return end
+wifi = {}
 
-hs.wifi.watcher.new(function()
+-- Keep track of what network we're on, and trigger actions:
+wifi.previous_wifi_network = nil
+
+wifi.watcher = hs.wifi.watcher.new(function()
     if hs.wifi.currentNetwork() then
-        previous_wifi_network = hs.wifi.currentNetwork()
-        hs.alert.show("Joined Wi-Fi network: "..previous_wifi_network)
+        wifi.previous_wifi_network = hs.wifi.currentNetwork()
+        hs.alert.show("Joined Wi-Fi network: "..wifi.previous_wifi_network)
     else
-	hs.alert.show("Left Wi-Fi network: "..(previous_wifi_network or "N/A"))
-	previous_wifi_network = nil
+	hs.alert.show("Left Wi-Fi network: "..(wifi.previous_wifi_network or "N/A"))
+	wifi.previous_wifi_network = nil
     end
 end):start()
