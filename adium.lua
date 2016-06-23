@@ -5,6 +5,7 @@ adium = {}
 adium.adium_status = 0
 adium.gotomeeting_status = 0
 adium.joinme_status = 0
+adium.zoom_status = 0
 
 -- Hang on to these so they're not garbage-collected after a while (usually hours):
 
@@ -52,7 +53,7 @@ function adium.update_adium_status()
     if adium.adium_status == 0 then
         return
     end
-    if adium.gotomeeting_status > 0 or adium.joinme_status > 0 then
+    if adium.gotomeeting_status > 0 or adium.joinme_status > 0 or adium.zoom_status > 0 then
         local err, result = adium.switch_adium_status("Available", "Conference Call")
         if result > 0 then
             hs.alert.show("Switched Adium to Conference Call status for "..result.." accounts.")
@@ -188,6 +189,12 @@ adium.startup = hs.timer.doAfter(1, function()
 	        adium.log.wf("joinme_status somehow managed to be %d. Corrected.", adium.joinme_status)
 		adium.joinme_status = 0
 	    end
+	elseif name == "zoom.us" then
+	    adium.zoom_status = adium.log_update("zoom.us", adium.zoom_status, new_status)
+	    if adium.zoom_status < 0 then
+	        adium.log.wf("zoom_status somehow managed to be %d. Corrected.", adium.zoom_status)
+		adium.zoom_status = 0
+	    end
 	else
 	    return
 	end
@@ -199,6 +206,7 @@ adium.startup = hs.timer.doAfter(1, function()
 	adium.update_adium_status()
     end):start()
 
+    -- Check status of GoToMeeting:
     local app = hs.application.find("GoToMeeting")
     if app then
 	hs.alert.show("GoToMeeting is running")
@@ -207,6 +215,7 @@ adium.startup = hs.timer.doAfter(1, function()
 	hs.alert.show("GoToMeeting is not running")
     end
 
+    -- Check status of Join.me:
     app = hs.application.get("join.me")
     if app then
 	hs.alert.show("join.me is running")
@@ -215,12 +224,22 @@ adium.startup = hs.timer.doAfter(1, function()
 	hs.alert.show("join.me is not running")
     end
 
+    -- Check status of Adium:
     local app = hs.application.get("Adium")
     if app then
 	hs.alert.show("Adium is running")
 	adium.adium_status = adium.log_update("adium", adium.adium_status, 1)
     else
 	hs.alert.show("Adium is not running")
+    end
+
+    -- Check status of Zoom:
+    local app = hs.application.get("zoom.us")
+    if app then
+	hs.alert.show("Zoom is running")
+	adium.zoom_status = adium.log_update("zoom", adium.zoom_status, 1)
+    else
+	hs.alert.show("Zoom is not running")
     end
 
     adium.update_adium_status()
