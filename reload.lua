@@ -1,3 +1,8 @@
+--[[
+	Watch for modified *.lua files in ~/.hammerspoon/ and automatically
+	trigger a reload of Hammerspoon itself if one is detected.
+]]
+
 if reload then return end
 
 reload = {}
