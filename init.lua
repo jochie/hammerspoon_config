@@ -1,3 +1,9 @@
+--[[
+
+Hammerspoon entrance point
+
+]]
+
 -- React to wifi changes:
 require "wifi"
 
@@ -10,7 +16,7 @@ require "reload"
 
 -- require "application"
 
-require "adium"
+-- require "adium"
 require "slate"
 require "iterm"
 require "zoom"
