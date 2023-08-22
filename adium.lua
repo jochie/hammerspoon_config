@@ -80,7 +80,7 @@ function adium.adium_time_status()
 	    adium.log.df('adium_time_status: Intend to switch adium from "Away" to "Home. Enjoy your weekend!".')
 	    local err, result = adium.switch_adium_status("Away", "Home. Enjoy your weekend!")
 	    if result > 0 then
-		hs.alert.show("WEEKEND: Switched Adium to Weekend (from Away) status for "..result.." accounts.")
+		hs.alert.show("Switched Adium to Weekend (from Away) status for "..result.." accounts.")
                 adium.log.df('adium_time_status: Succeeded for %d accounts.', result)
             else
                 adium.log.d('adium_time_status: Succeeded for zero accounts.')
@@ -94,7 +94,7 @@ function adium.adium_time_status()
 		adium.log.df('adium_time_status: Intend to switch adium from "Away" to "Gone for the day".')
 		local err, result = adium.switch_adium_status("Away", "Gone for the day.")
 		if result > 0 then
-		    hs.alert.show("EVENING: Switched Adium to Evening (from Away) status for "..result.." accounts.")
+		    hs.alert.show("Switched Adium to Evening (from Away) status for "..result.." accounts.")
 		    adium.log.df('adium_time_status: Succeeded for %d accounts.', result)
 		else
 		    adium.log.d('adium_time_status: Succeeded for zero accounts.')
@@ -107,7 +107,7 @@ function adium.adium_time_status()
 		adium.log.df('adium_time_status: Intend to switch adium from "Away" to "AFK/Out for lunch".')
 		local err, result = adium.switch_adium_status("Away", "AFK/Out for lunch")
 		if result > 0 then
-		    hs.alert.show("EVENING: Switched Adium to Lunch status for "..result.." accounts.")
+		    hs.alert.show("Switched Adium to Lunch status for "..result.." accounts.")
 		    adium.log.df('adium_time_status: Succeeded for %d accounts.', result)
 		else
 		    adium.log.d('adium_time_status: Succeeded for zero accounts.')
@@ -124,21 +124,21 @@ function adium.adium_time_status()
 		    if exitCode == 1 then
 			local err, result = adium.switch_adium_status("Gone for the day.", "Available")
 			if result > 0 then
-			    hs.alert.show("EVENING: Switched Adium to Available (from Evening) status for "..result.." accounts.")
+			    hs.alert.show("Switched Adium to Available (from Evening) status for "..result.." accounts.")
 			    adium.log.df('adium_time_status: Succeeded for %d accounts.', result)
 			else
 			    -- adium.log.d('adium_time_status: Succeeded for zero accounts.')
 			end
 			local err, result = adium.switch_adium_status("Home. Enjoy your weekend!", "Available")
 			if result > 0 then
-			    hs.alert.show("EVENING: Switched Adium to Available (from Weekend) status for "..result.." accounts.")
+			    hs.alert.show("Switched Adium to Available (from Weekend) status for "..result.." accounts.")
 			    adium.log.df('adium_time_status: Succeeded for %d accounts.', result)
 			else
 			    adium.log.d('adium_time_status: Succeeded for zero accounts.')
 			end
 			local err, result = adium.switch_adium_status("AFK/Out for lunch", "Available")
 			if result > 0 then
-			    hs.alert.show("EVENING: Switched Adium to Available (from Lunch) status for "..result.." accounts.")
+			    hs.alert.show("Switched Adium to Available (from Lunch) status for "..result.." accounts.")
 			    adium.log.df('adium_time_status: Succeeded for %d accounts.', result)
 			else
 			    adium.log.d('adium_time_status: Succeeded for zero accounts.')

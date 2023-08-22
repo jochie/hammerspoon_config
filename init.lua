@@ -1,9 +1,3 @@
---[[
-
-From the hello world section: http://www.hammerspoon.org/go/#helloworld
-
-]]
-
 -- React to wifi changes:
 require "wifi"
 
@@ -17,6 +11,9 @@ require "reload"
 -- require "application"
 
 require "adium"
+require "slate"
+require "iterm"
+require "zoom"
 
 -- Indicate we're done loading the configuration file.
 hs.alert.show("Config (re)loaded")
