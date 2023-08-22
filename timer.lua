@@ -1,3 +1,7 @@
+--[[
+	Just testing some basic Hammerspoon concepts
+]]
+
 if timer then return end
 
 timer = {}
