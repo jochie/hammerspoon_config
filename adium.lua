@@ -1,3 +1,10 @@
+--[[
+	Code that automatically changes the status of Adium depending on what
+	other applications are running.
+
+	Obsolete, as I don't use Adium anymore.
+]]
+
 if adium then return end
 
 adium = {}
