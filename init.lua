@@ -19,7 +19,7 @@ require "reload"
 -- require "adium"
 require "slate"
 require "iterm"
-require "zoom"
+-- require "zoom"
 
 -- Indicate we're done loading the configuration file.
 hs.alert.show("Config (re)loaded")
